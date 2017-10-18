@@ -39,3 +39,5 @@ copy taxi_dc from '/home/mckenzieg/data/taxi/taxi_201703_clean.txt' with csv hea
 delete from taxi_dc where pu_lat is null and do_lat is null;
 alter table taxi_dc add column do_ts timestamp without time zone;
 update taxi_dc set do_ts = do_datetime::timestamp without time zone;
+alter table taxi_dc add column pu_ts timestamp without time zone;
+update taxi_dc set pu_ts = pu_datetime::timestamp without time zone;
