@@ -41,3 +41,20 @@ alter table taxi_dc add column do_ts timestamp without time zone;
 update taxi_dc set do_ts = do_datetime::timestamp without time zone;
 alter table taxi_dc add column pu_ts timestamp without time zone;
 update taxi_dc set pu_ts = pu_datetime::timestamp without time zone;
+
+alter table taxi_dc add column pu_latd double precision;
+alter table taxi_dc add column pu_lngd double precision;
+alter table taxi_dc add column do_latd double precision;
+alter table taxi_dc add column do_lngd double precision;
+
+update taxi_dc set pu_latd = regexp_replace(split_part(pu_lat, ' ',1), '[^0-9.]', '', 'g')::float8 where char_length(regexp_replace(split_part(pu_lat, ' ',1), '[^0-9.]', '', 'g')) > 1;
+
+delete from taxi_dc where position('.' in pu_lng) != 4;
+delete from taxi_dc where pu_lng = '-77.018738.896723';
+update taxi_dc set pu_lngd = regexp_replace(split_part(pu_lng, ' ',1), '[^0-9.-]', '', 'g')::float8 where char_length(regexp_replace(split_part(pu_lng, ' ',1), '[^0-9.-]', '', 'g')) > 1;
+
+update taxi_dc set do_latd = regexp_replace(split_part(do_lat, ' ',1), '[^0-9.]', '', 'g')::float8 where char_length(regexp_replace(split_part(do_lat, ' ',1), '[^0-9.]', '', 'g')) > 1;
+update taxi_dc set do_lngd = regexp_replace(split_part(do_lng, ' ',1), '[^0-9.]', '', 'g')::float8 where char_length(regexp_replace(split_part(do_lng, ' ',1), '[^0-9.]', '', 'g')) > 1;
+
+
+Select pu_lng, (length(pu_lng) - position('.' in reverse(pu_lng)) + 1) from taxi_dc where (length(pu_lng) - position('.' in reverse(pu_lng)) + 1) > 4
