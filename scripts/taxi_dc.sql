@@ -42,6 +42,7 @@ update taxi_dc set do_ts = do_datetime::timestamp without time zone;
 alter table taxi_dc add column pu_ts timestamp without time zone;
 update taxi_dc set pu_ts = pu_datetime::timestamp without time zone;
 
+-- UPDATE LAT/LNG TO FLOAT8 vals.
 alter table taxi_dc add column pu_latd double precision;
 alter table taxi_dc add column pu_lngd double precision;
 alter table taxi_dc add column do_latd double precision;
@@ -53,8 +54,16 @@ delete from taxi_dc where position('.' in pu_lng) != 4;
 delete from taxi_dc where pu_lng = '-77.018738.896723';
 update taxi_dc set pu_lngd = regexp_replace(split_part(pu_lng, ' ',1), '[^0-9.-]', '', 'g')::float8 where char_length(regexp_replace(split_part(pu_lng, ' ',1), '[^0-9.-]', '', 'g')) > 1;
 
+delete from taxi_dc where position('.' in do_lat) != 3;
+delete from taxi_dc where (length(do_lat) - position('.' in reverse(do_lat)) + 1) <= 10 and (length(do_lat) - position('.' in reverse(do_lat)) + 1) > 3;
 update taxi_dc set do_latd = regexp_replace(split_part(do_lat, ' ',1), '[^0-9.]', '', 'g')::float8 where char_length(regexp_replace(split_part(do_lat, ' ',1), '[^0-9.]', '', 'g')) > 1;
-update taxi_dc set do_lngd = regexp_replace(split_part(do_lng, ' ',1), '[^0-9.]', '', 'g')::float8 where char_length(regexp_replace(split_part(do_lng, ' ',1), '[^0-9.]', '', 'g')) > 1;
 
+delete from do_lng from taxi_dc where position('.' in do_lng) != 4;
+delete from taxi_dc where (length(do_lng) - position('.' in reverse(do_lng)) + 1) <= 16 and (length(do_lng) - position('.' in reverse(do_lng)) + 1) > 4;
+update taxi_dc set do_lngd = regexp_replace(split_part(do_lng, ' ',1), '[^0-9.-]', '', 'g')::float8 where char_length(regexp_replace(split_part(do_lng, ' ',1), '[^0-9.-]', '', 'g')) > 1;
 
-Select pu_lng, (length(pu_lng) - position('.' in reverse(pu_lng)) + 1) from taxi_dc where (length(pu_lng) - position('.' in reverse(pu_lng)) + 1) > 4
+delete from taxi_dc where pu_latd is null;
+delete from taxi_dc where pu_lngd is null;
+
+--delete from taxi_dc where (length(do_lat) - position('.' in reverse(do_lat)) + 1) <= 10 and (length(do_lat) - position('.' in reverse(do_lat)) + 1) > 4;
+--Select do_lat, (length(do_lat) - position('.' in reverse(do_lat)) + 1) from taxi_dc where (length(do_lat) - position('.' in reverse(do_lat)) + 1) > 3
