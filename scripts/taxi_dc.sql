@@ -62,8 +62,25 @@ delete from do_lng from taxi_dc where position('.' in do_lng) != 4;
 delete from taxi_dc where (length(do_lng) - position('.' in reverse(do_lng)) + 1) <= 16 and (length(do_lng) - position('.' in reverse(do_lng)) + 1) > 4;
 update taxi_dc set do_lngd = regexp_replace(split_part(do_lng, ' ',1), '[^0-9.-]', '', 'g')::float8 where char_length(regexp_replace(split_part(do_lng, ' ',1), '[^0-9.-]', '', 'g')) > 1;
 
+-- ONLY KEEP RECORDS THAT HAVE PU AND DO LOCATIONS
 delete from taxi_dc where pu_latd is null;
 delete from taxi_dc where pu_lngd is null;
+delete from taxi_dc where do_latd is null;
+delete from taxi_dc where do_lngd is null;
+delete from taxi_dc where pu_lngd = -77;
+delete from taxi_dc where do_lngd = -77;
 
+-- Update GEOMETRY
+alter table taxi_dc add column pu_geom geometry;
+alter table taxi_dc add column do_geom geometry;
+update taxi_dc set pu_geom = st_setsrid(st_makepoint(pu_lngd, pu_latd),4326);
+update taxi_dc set do_geom = st_setsrid(st_makepoint(do_lngd, do_latd),4326);
+
+
+create table taxi_dc_pu as select oid, pu_ts, pu_geom from taxi_dc;
+-- pgsql2shp -f "taxi_dc_pu" taxi public.taxi_dc_pu
+
+
+-- MISC
 --delete from taxi_dc where (length(do_lat) - position('.' in reverse(do_lat)) + 1) <= 10 and (length(do_lat) - position('.' in reverse(do_lat)) + 1) > 4;
 --Select do_lat, (length(do_lat) - position('.' in reverse(do_lat)) + 1) from taxi_dc where (length(do_lat) - position('.' in reverse(do_lat)) + 1) > 3
