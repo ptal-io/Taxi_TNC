@@ -43,6 +43,7 @@
                 $f .= str_replace("|","",trim(substr($line,5378,19)));
                 //$a = explode("|",$f);
                 //echo count($a) . "\n";
+                $f = str_replace('"','',$f);
                 fwrite($out, $f."\n");
             }
 
